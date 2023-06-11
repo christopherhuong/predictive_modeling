@@ -1,0 +1,55 @@
+---
+title: "exer1"
+author: "Christopher Huong"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+
+```{r}
+
+
+
+
+
+```
+
+
+
+
+Due 11:59 PM CT 06/11/2023
+
+Consider a well-known dataset on per capita income and per capita spending in public schools by state in the United States in 1979. (Available on blackboard). This dataset has been widely analyzed in various statistical. As in those previous analyses, we take per capita spending (Expenditure) as the dependent variable and per capita income as the predictor variable.   
+
+a)	Draw a scatter-plot to check the relationship between Income and Expenditure and interpret the relationship between Income and Expenditure.
+
+b)	Find and interpret the slope for the least squares regression line 
+
+c)	Find and interpret y-intercept for the least squares regression line 
+
+d)	Find the least square regression equation and circle the results from your outputs. 
+
+e)	Find proportion of the variation that can be explained by the least squares regression line (i.e., R2).
+
+f)	Find the estimator of σ2  (i.e., s2) and interpret the value of this estimator. 
+
+g)	Check if the data contain any outlier or influential points?
+
+h)	Fit a single linear model and conduct 10-fold CV to estimate the error. In addition, draw the scatter plot with the fitted line and the scatter plot between the observed and fitted values below. 
+ 
+i)	Fit a quadratic model and conduct 10-fold CV to estimate the error and draw the scatter plot with the fitted line and the scatter plot between the observed and fitted values.
+
+j)	Fit a mars model with optimal tuning parameters that you choose and conduct 10-fold CV to estimate the error and draw the scatter plot with the fitted line and the scatter plot between the observed and fitted values.
+
+k)	Compare the three fitted models in terms of RMSE and R2, and then make a recommendation based on your criteria. 
+
+
+
+
+
+
+
+
+
+
+
