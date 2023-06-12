@@ -6,7 +6,236 @@ output: pdf_document
 ---
 
 
+```{r, warning = F, message = F}
+library(rio)
+library(tidyverse)
+library(caret)
+library(ggplot2)
+library(gridExtra)
+library(ggpubr)
+library(earth)
+```
+
+
+Due 11:59 PM CT 06/11/2023
+
+Consider a well-known dataset on per capita income and per capita spending in public schools by state in the United States in 1979. (Available on blackboard). This dataset has been widely analyzed in various statistical. As in those previous analyses, we take per capita spending (Expenditure) as the dependent variable and per capita income as the predictor variable.   
+
 ```{r}
+dat <- import('ex1.csv')
+
+
+
+dat <- dat[order(dat$Income),]
+```
+
+
+a)	Draw a scatter-plot to check the relationship between Income and Expenditure and interpret the relationship between Income and Expenditure.
+
+```{r}
+
+ggplot(dat, aes(x=Income, y=Expenditure)) +
+  geom_point()
+
+```
+# There is a positive linear relationship between state income and expenditure
+
+
+
+b)	Find and interpret the slope for the least squares regression line 
+
+```{r}
+lm1 <- train(Expenditure ~ Income,
+             data = dat,
+             method = "lm",
+             trControl = trainControl(method="cv"))
+summary(lm1)
+
+ggplot(dat, aes(x=Income, y=Expenditure)) + 
+  geom_point()+
+  geom_smooth(method=lm)
+
+```
+
+# The slope for the least squares regression line is 0.069. This is interpreted as for every unit increase in income, you can expect a 0.069 unit increase in expenditure.
+
+
+
+c)	Find and interpret y-intercept for the least squares regression line 
+```{r}
+summary(lm1)
+```
+# The y-intercept for the least squares regression line is -151.265. This is interpreted as when income is at 0 units, expenditure is expected to be -151.265 units.
+
+
+d)	Find the least square regression equation and circle the results from your outputs. 
+
+# y = -151.265 + x*0.0689 + e
+
+
+e)	Find proportion of the variation that can be explained by the least squares regression line (i.e., R2).
+
+```{r}
+lm1
+```
+# R^2 = 0.6388, meaning 63.88% of the variance of expenditure can be explained by regressing expenditure on income
+
+
+
+f)	Find the estimator of o2  (i.e., s2) and interpret the value of this estimator. 
+
+```{r}
+
+sum((dat$Expenditure-mean(dat$Expenditure))^2)/(nrow(dat)-1)
+
+var(dat$Expenditure)
+```
+# The variance is the square of the standard deviation, interpreted as the square of the average distance each value of y is from it's mean.
+
+
+
+g)	Check if the data contain any outlier or influential points?
+
+
+# AK is an outlier with y=821 and x=10851. Removing AK from the data set yields: 
+
+```{r}
+a <- ggplot(dat, aes(x=Income, y=Expenditure)) + 
+       geom_point()+
+       geom_smooth(method=lm)
+
+b <-ggplot(filter(dat, State!='AK'), aes(x=Income, y=Expenditure)) + 
+       geom_point()+
+       geom_smooth(method=lm)
+
+
+
+a <- ggplot(dat,aes(x = Income, y = Expenditure)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se=T) +
+  xlim(5000,11100) + ylim(200, 850) +
+  stat_regline_equation(label.y = 800, aes(label = ..eq.label..)) +
+  stat_regline_equation(label.y = 750, aes(label = ..rr.label..))
+
+b <- ggplot(filter(dat, State!='AK'),aes(x = Income, y = Expenditure)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se=T) +
+  xlim(5000,11100) + ylim(200, 850) +
+  stat_regline_equation(label.y = 800, aes(label = ..eq.label..)) +
+  stat_regline_equation(label.y = 750, aes(label = ..rr.label..))
+
+grid.arrange(a, b, ncol=2)
+
+```
+# Removing AK reduces the slope by 100*(1-(0.052/0.069)) = 24.6%
+
+
+
+
+h)	Fit a single linear model and conduct 10-fold CV to estimate the error. In addition, draw the scatter plot with the fitted line and the scatter plot between the observed and fitted values below. 
+
+
+```{r}
+
+lm <- train(Expenditure ~ Income,
+             data = dat,
+             method = "lm",
+             trControl = trainControl(method = "cv"))
+
+summary(lm)
+
+
+par(mfrow=c(1,2))
+plot(dat$Income, dat$Expenditure, xlab = "Income", ylab= "Expenditure")
+lines(dat$Income, fitted(lm), col=2, lwd=2)
+
+
+Observed = dat$Expenditure
+Predicted = fitted(lm)
+plot(Observed, Predicted)
+
+```
+
+
+
+
+
+
+
+ 
+i)	Fit a quadratic model and conduct 10-fold CV to estimate the error and draw the scatter plot with the fitted line and the scatter plot between the observed and fitted values.
+
+```{r}
+dat$Income2 <- dat$Income^2
+
+
+lm2 <- train(Expenditure ~ Income + Income2,
+             data = dat,
+             method = "lm",
+             trControl = trainControl(method = "cv"))
+
+summary(lm2)
+
+par(mfrow=c(1,2))
+plot(dat$Income, dat$Expenditure, xlab = "Income", ylab= "Expenditure")
+lines(dat$Income, fitted(lm2), col=2, lwd=2)
+
+
+
+Observed2 = dat$Expenditure
+Predicted2 = fitted(lm2)
+plot(Observed2, Predicted2)
+
+
+```
+
+
+
+
+j)	Fit a mars model with optimal tuning parameters that you choose and conduct 10-fold CV to estimate the error and draw the scatter plot with the fitted line and the scatter plot between the observed and fitted values.
+
+
+
+```{r}
+
+marsfit <- train(Expenditure ~ Income,
+                 data = dat,
+                 method = "earth",
+                 tuneLength = 15,
+                 trControl = trainControl(method="cv"))
+
+marsfit
+summary(marsfit)
+
+
+par(mfrow=c(1,2))
+plot(dat$Income, dat$Expenditure, xlab = "Income", ylab= "Expenditure")
+lines(dat$Income, fitted(marsfit), col=2, lwd=2)
+
+
+
+Observed = dat$Expenditure
+Predicted = fitted(marsfit)
+plot(Observed, Predicted)
+
+```
+
+
+
+
+
+
+k)	Compare the three fitted models in terms of RMSE and R2, and then make a recommendation based on your criteria. 
+
+```{r}
+dat$lm1 <- predict(lm1, dat)
+dat$lm2 <- predict(lm2, dat)
+dat$marsfit <- predict(marsfit, dat)
+
+
+postResample(pred = dat$lm1, obs = dat$Expenditure)
+postResample(pred = dat$lm2, obs = dat$Expenditure)
+postResample(pred = dat$marsfit, obs = dat$Expenditure)
 
 
 
@@ -16,37 +245,7 @@ output: pdf_document
 
 
 
-
-Due 11:59 PM CT 06/11/2023
-
-Consider a well-known dataset on per capita income and per capita spending in public schools by state in the United States in 1979. (Available on blackboard). This dataset has been widely analyzed in various statistical. As in those previous analyses, we take per capita spending (Expenditure) as the dependent variable and per capita income as the predictor variable.   
-
-a)	Draw a scatter-plot to check the relationship between Income and Expenditure and interpret the relationship between Income and Expenditure.
-
-b)	Find and interpret the slope for the least squares regression line 
-
-c)	Find and interpret y-intercept for the least squares regression line 
-
-d)	Find the least square regression equation and circle the results from your outputs. 
-
-e)	Find proportion of the variation that can be explained by the least squares regression line (i.e., R2).
-
-f)	Find the estimator of σ2  (i.e., s2) and interpret the value of this estimator. 
-
-g)	Check if the data contain any outlier or influential points?
-
-h)	Fit a single linear model and conduct 10-fold CV to estimate the error. In addition, draw the scatter plot with the fitted line and the scatter plot between the observed and fitted values below. 
- 
-i)	Fit a quadratic model and conduct 10-fold CV to estimate the error and draw the scatter plot with the fitted line and the scatter plot between the observed and fitted values.
-
-j)	Fit a mars model with optimal tuning parameters that you choose and conduct 10-fold CV to estimate the error and draw the scatter plot with the fitted line and the scatter plot between the observed and fitted values.
-
-k)	Compare the three fitted models in terms of RMSE and R2, and then make a recommendation based on your criteria. 
-
-
-
-
-
+# Based on the best model fit (lowest RMSEA) and variance accounted for (highest R2), the quadratic model is recommended.
 
 
 
