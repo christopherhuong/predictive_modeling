@@ -1,0 +1,117 @@
+---
+title: "exer2"
+author: "Christopher Huong"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+Due 11:59 PM CT 06/18/2023
+
+The UC Irvine Machine Learning Repository contains a data set related to glass identification. The data consist of 214 glass samples labeled as one of seven class categories. There are nine predictors, including the refractive index and percentages of eight elements: Na, Mg, Al, Si, K, Ca, Ba, and Fe.
+
+``` {r, warning = F, message = F}
+library(mlbench)
+library(tidyverse)
+library(psych)
+library(caret)
+data(Glass)
+str(Glass)
+
+```
+a)	Using visualizations, explore the predictor variables to understand their distributions as well as the relationships between predictors. 
+
+```{r}
+vars_list <- as.list(colnames(select(Glass,-Type)))
+
+par(mfrow=c(3,3))
+for(i in vars_list){hist(select(Glass,-Type)[,i],xlab=i,main="")}
+
+```
+
+```{r}
+plot(select(Glass, -Type))
+
+
+```
+
+
+
+b)	Do there appear to be any outliers in the data? Are any predictors skewed? Show all work! 
+```{r}
+describe(Glass)
+
+```
+#Based on the histograms, Fe and K seem to have outliers (0.51, and 6.21 respectively).
+#Based on the skewness and kurtosis statistics, RI, K, Ca, Ba, and Fe are significantly right-skewed, and Mg is significantly left-skewed.
+
+
+
+c)	Are there any relevant transformations of one or more predictors that might improve the classification model? Show all work! 
+
+```{r}
+
+trans <- BoxCoxTrans(Glass$Ca)
+b <- predict(trans, Glass$Ca)
+par(mfrow = c(1, 2))
+histogram(Glass$Ca, xlab='natural units', type='count', main='Original')
+histogram(b, xlab='log units', type='count', main='Log transform')
+
+describe(b)
+
+```
+
+#The BoxCox transformation reduced the skewness of Ca from 2.02 to -0.19
+
+
+d)	Fit SVM model (You may refer to Chapter 4 material for details) using the following codes: 
+
+```{r, warning=F, message=F}
+# install.packages('kernlab')
+library(kernlab) 
+set.seed(231) 
+sigDist <- sigest(Type~ ., data = Glass, frac = 1)
+sigDist 
+#   90%        50%        10% 
+# 0.03407935 0.11297847 0.62767315 
+
+svmTuneGrid <- data.frame(sigma = as.vector(sigDist)[1], C = 2^(-2:10)) 
+svmTuneGrid 
+#      sigma       C
+# 1  0.03407935    0.25
+# 2  0.03407935    0.50
+# 3  0.03407935    1.00
+# 4  0.03407935    2.00
+# 5  0.03407935    4.00
+# 6  0.03407935    8.00
+# 7  0.03407935   16.00
+# 8  0.03407935   32.00
+# 9  0.03407935   64.00
+# 10 0.03407935  128.00
+# 11 0.03407935  256.00
+# 12 0.03407935  512.00
+# 13 0.03407935 1024.00
+
+
+library(AppliedPredictiveModeling)
+library(caret) #access the train function 
+
+set.seed(1056) 
+#It may take a while to run
+svmFit <- train(Type~ ., data = Glass, method = "svmRadial",
+preProc = c("center", "scale"),tuneGrid = svmTuneGrid,
+trControl = trainControl(method = "repeatedcv", repeats = 5))
+
+plot(svmFit, scales = list(x = list(log = 2)))
+
+ 
+```
+
+
+
+
+
+
+
+
+
+
