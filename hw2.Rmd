@@ -1,0 +1,129 @@
+---
+title: "hw1"
+author: "chris"
+date: "2023-06-24"
+output: pdf_document
+---
+Christopher Huong
+SHG100
+
+```{r, warning=F, message=F}
+library(mlbench)
+library(tidyverse)
+library(psych)
+
+data(Glass)
+
+glimpse(Glass)
+
+```
+# Exercise 3.1
+
+# (a) Using visualizations, explore the predictor variables to understand their
+distributions as well as the relationships between predictors.
+
+
+Plot histograms of each predictor
+
+```{r}
+
+vars_list <- as.list(colnames(select(Glass,-Type)))
+
+par(mfrow=c(3,3))
+for(i in vars_list){hist(select(Glass,-Type)[,i],xlab=i,main="")}
+
+
+```
+
+Based off historygrams, Mg shows significant left skew, and K, Ca, Ba, and Fe show significant right skew. K, Ca, and Fe also seem to have outliers at the far right of the distribution.
+
+
+Compute skewness
+
+```{r}
+describe(select(Glass, -Type))[, c(3,4,5,8,9,10,11)]
+```
+
+Skewness statistics show that Rl, K, Ca, Ba, and Fe are right skewed, and Mg is left skewed.
+
+
+Plot each predictor againt each other
+
+```{r}
+plot(select(Glass, -Type))
+```
+Visualizing pairwise scatterplots show that Rl and Ca are highly correlated.
+
+
+
+Compute pairwise correlations between each predictor
+
+```{r}
+
+cor(select(Glass, -Type), select(Glass, -Type))
+```
+Rl and Ca indeed show the highest correlation (r=0.81)
+
+
+Compute correlations between each predictor and glass type.
+
+```{r}
+
+cor(select(Glass, -Type), as.numeric(Glass[,10]))
+
+```
+
+
+
+
+
+
+# Exercise 3.2
+
+```{r}
+data("Soybean")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
