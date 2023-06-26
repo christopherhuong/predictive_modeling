@@ -1,0 +1,337 @@
+---
+title: "hw1"
+author: "chris"
+date: "2023-06-24"
+output: pdf_document
+---
+Christopher Huong
+SHG100
+
+```{r, warning=F, message=F}
+library(mlbench)
+library(tidyverse)
+library(psych)
+library(caret)
+library(naniar)
+library(knitr)
+data(Glass)
+
+glimpse(Glass)
+
+```
+# Exercise 3.1
+
+# (a) Using visualizations, explore the predictor variables to understand their
+distributions as well as the relationships between predictors.
+
+
+Plot histograms of each predictor
+
+```{r}
+
+vars_list <- as.list(colnames(select(Glass,-Type)))
+
+par(mfrow=c(3,3))
+for(i in vars_list){hist(select(Glass,-Type)[,i],xlab=i,main="")}
+
+
+```
+
+
+
+
+Based off histograms, Mg shows significant left skew, and K, Ca, Ba, and Fe show significant right skew.
+
+Also, some predictors include 0, and some do not. Further, there is wide variability in the scale of the distribution (range of x-axis)
+
+# (b) Do there appear to be any outliers in the data? Are any predictors skewed?
+
+ K, Ca, and Fe seem to have outliers at the far right of the distribution.
+
+Compute skewness
+
+```{r}
+describe(select(Glass, -Type))[, c(3,4,5,8,9,10,11)]
+```
+
+Skewness statistics show that Rl, K, Ca, Ba, and Fe are right skewed, and Mg is left skewed.
+
+
+# (c) Are there any relevant transformations of one or more predictors that
+might improve the classification model?
+
+
+Plot each predictor against each other
+
+```{r}
+plot(select(Glass, -Type))
+```
+Visualizing pairwise scatterplots show that Rl and Ca are highly correlated.
+
+
+
+Compute pairwise correlations between each predictor
+
+```{r}
+
+cor(select(Glass, -Type), select(Glass, -Type))
+```
+Rl & Ca indeed show the highest correlation (r=0.81) and thus may be redundant as predictors in a model, and could be reduced or one predictor could be removed.
+
+The other highly (above 0.5) correlated predictor is RI & Si (r=-0.54) 
+
+
+
+Perform PCA with mean centering and scaling. Compute variance with 
+
+```{r}
+
+pca <- prcomp(select(Glass, -Type),
+ center = TRUE, scale. = TRUE)
+
+summary(pca)
+
+```
+
+Reducing the data to 4 principal components retains 79% of the variance explained
+
+
+
+#############################################
+
+
+# Exercise 3.2
+
+```{r}
+data("Soybean")
+str(Soybean)
+```
+
+# (a) Investigate the frequency distributions for the categorical predictors. Are
+any of the distributions degenerate in the ways discussed earlier in this
+chapter?
+
+
+
+```{r}
+describe(Soybean)[, c(3,4,5,8,9,10,11)]
+
+
+```
+
+Left skewed:  precip, leaves
+Right skewed: hail, leaf.shread, leaf.malf, leaf.mild, lodging, fruiting.bodies, ext.decay, mycelium, int.discolor, sclerotia, fruit.pods, seed, mold.growth, seed.discolor, seed.size, shriveling, roots
+
+
+# (b) Roughly 18 % of the data are missing. Are there particular predictors that
+are more likely to be missing? Is the pattern of missing data related to
+the classes?
+
+
+
+
+```{r}
+percentmiss <- function(x){
+  sum(is.na(x)) / length(x) * 100} 
+
+apply(Soybean, 2, percentmiss)   ####percent missingness per col
+
+#Class and leaves have no missing
+```
+
+Check percent of missing data by level of Class
+
+```{r}
+missingbyclass <- apply(select(Soybean, -c(Class, leaves)), 2, function(x, y) {
+  tab <- table(is.na(x), y)
+  tab[2, ] / colSums(tab)
+}, y = Soybean$Class)
+
+
+missingbyclass <- missingbyclass[apply(missingbyclass, 1, sum) > 0,]
+missingbyclass <- missingbyclass[, apply(missingbyclass, 2, sum) > 0]
+
+t(missingbyclass)
+
+
+```
+
+
+
+
+# (c) Develop a strategy for handling missing data, either by eliminating
+predictors or imputation
+
+
+Lets just impute
+
+
+```{r, warning=F, message=F}
+library(mice)
+
+# Soybean_imp <- mice(Soybean, maxit=3,m=3, seed=333)
+
+```
+
+
+
+Then use Rubin's rule to pool model estimates across imputations.
+
+
+######################################################
+
+# 4.1
+
+Note: For Exercise 4.1 (a) of your textbook, you just need to make comments based on Fig. 1.1 on page 7 of textbook. Since the data link is not available anymore, you do not need to use R code to access the data.
+
+
+
+
+# (a) What data splitting method(s) would you use for these data? Explain.
+
+As the sample is large (N=12,495) you can split the sample to train the model, and test the model. If the uneven distribution of Genres is worrying, then using k-fold cross-validation can help ensure that each Genre is adequately sampled and not underrepresented in the training set due to chance.
+
+
+
+
+
+4.4. Brodnjak-Vonina et al. (2005) develop a methodology for food laboratories to determine the type of oil from a sample. In their procedure, they used
+a gas chromatograph (an instrument that separate chemicals in a sample) to
+measure seven different fatty acids in an oil. These measurements would then
+be used to predict the type of oil in a food samples. To create their model,
+they used 96 samples2 of seven types of oils.
+These data can be found in the caret package using data(oil). The oil
+types are contained in a factor variable called oilType. The types are pumpkin(coded as A), sunflower (B), peanut (C), olive (D), soybean (E), rapeseed (F)
+and corn (G). 
+
+```{r}
+data(oil)
+fattyAcids$oilType <- oilType
+```
+
+# (a) Use the sample function in base R to create a completely random sample
+of 60 oils. How closely do the frequencies of the random sample match
+the original samples? Repeat this procedure several times of understand
+the variation in the sampling process.
+
+
+```{r}
+
+prop.table(table(fattyAcids$oilType))
+
+set.seed(111)
+sample1 <- fattyAcids[sample(1:nrow(fattyAcids), size = 60), ]  
+prop.table(table(sample1$oilType))
+
+sample2 <- fattyAcids[sample(1:nrow(fattyAcids), size = 60), ]  
+prop.table(table(sample2$oilType))
+
+sample3 <- fattyAcids[sample(1:nrow(fattyAcids), size = 60), ]  
+prop.table(table(sample3$oilType))
+
+sample4 <- fattyAcids[sample(1:nrow(fattyAcids), size = 60), ]  
+prop.table(table(sample4$oilType))
+
+
+```
+Distributions of samples can vary relatively widely. For example C in the original sample is 3.1% of the data, while in sample 1 it is 5% of the data, which is a 161% larger.
+
+
+
+# (b) Use the caret package function createDataPartition to create a stratified
+random sample. How does this compare to the completely random samples?
+
+```{r}
+prop.table(table(fattyAcids$oilType))
+
+set.seed(111)
+strat <- createDataPartition(fattyAcids$oilType,
+ p = .59,
+ list= FALSE,
+ times=4)
+
+strat <- as.data.frame(strat)
+
+strat_sample1 <- fattyAcids[strat$Resample1, ]
+strat_sample2 <- fattyAcids[strat$Resample2, ]
+strat_sample3 <- fattyAcids[strat$Resample3, ]
+strat_sample4 <- fattyAcids[strat$Resample4, ]
+
+prop.table(table(strat_sample1$oilType))
+prop.table(table(strat_sample2$oilType))
+prop.table(table(strat_sample3$oilType))
+prop.table(table(strat_sample4$oilType))
+```
+The stratified samples are way closer (and more stable) to the original sample in oilType frequency
+
+
+
+# (c) With such a small samples size, what are the options for determining
+performance of the model? Should a test set be used?
+
+
+k-folds cross-validation can be used to test the performance of models built on small samples
+
+
+
+# (d) One method for understanding the uncertainty of a test set is to use a
+confidence interval. To obtain a confidence interval for the overall accuracy, the based R function binom.test can be used. It requires the user
+to input the number of samples and the number correctly classified to
+calculate the interval. For example, suppose a test set sample of 20 oil
+samples was set aside and 76 were used for model training. For this test
+set size and a model that is about 80 % accurate (16 out of 20 correct),
+the confidence interval would be computed using
+binom.test(16, 20)
+Exact binomial test
+data: 16 and 20
+number of successes = 16, number of trials = 20, p-value = 0.01182
+alternative hypothesis: true probability of success is not equal to 0.5
+95 percent confidence interval:
+0.563386 0.942666
+sample estimates:
+probability of success
+0.8
+In this case, the width of the 95 % confidence interval is 37.9 %. Try
+different samples sizes and accuracy rates to understand the trade-off
+between the uncertainty in the results, the model performance, and the
+test set size
+
+
+```{r}
+
+binom.test(x=5, n=10)
+binom.test(x=10, n=20)
+binom.test(x=15, n=30)
+binom.test(x=30, n=40)
+
+
+```
+
+
+The larger the test sample, the narrower the confidence interval (less uncertainty)
+
+
+
+
+
+
+```{r}
+
+binom.test(x=5, n=40)
+binom.test(x=10, n=40)
+binom.test(x=15, n=40)
+binom.test(x=30, n=40)
+
+
+```
+
+
+The higher the accuracy, the narrower the confidence interval (less uncertainty)
+
+
+
+
+
+
+
+
