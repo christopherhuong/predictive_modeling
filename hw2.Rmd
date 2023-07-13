@@ -1,0 +1,414 @@
+---
+title: "hw2"
+author: "chris"
+date: "2023-07-12"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+6.1 a)
+
+```{r, warning=F, message=F}
+library(caret)
+library(earth)
+data(tecator)
+str(absorp)
+str(endpoints)
+```
+
+6.1 b)	In this example the predictors are the measurements at the individual frequencies. Because the frequencies lie in a systematic order (850–1,050nm), the predictors have a high degree of correlation. Hence, the data lie in a smaller dimension than the total number of predictors (215). Use PCA to determine the effective dimension of these data. What is the effective dimension?
+
+
+
+```{r}
+
+pc <- prcomp(absorp, center=T,scale=T)
+
+summary(pc)
+
+```
+
+
+The first principal explains 98.63% of the variance, thus the data is effectively unidimensional.
+
+
+
+6.1 c) Split the data into a training and a test set, pre-process the data, and build each variety of models described in this chapter. For those models with tuning parameters, what are the optimal values of the tuning
+parameter(s)?
+
+
+
+```{r}
+set.seed(111)
+
+absorppca <- pc$x[,1:2]
+
+train <- createDataPartition(endpoints[,3], p=.80, list=F)
+
+predicttrain <- as.data.frame(absorppca[train,])
+predicttest <- as.data.frame(absorppca[-train,])
+outcometrain <- endpoints[train, 3]
+outcometest <- endpoints[-train, 3]
+
+```
+
+Use the mean centered and scaled first two principal components as the transformed predictors.
+
+Train models on 80% of the data. Outcome we are predicting is percentage of protein.
+
+Train a linear regression model using 10-fold cross-validation
+
+
+
+```{r}
+set.seed(111)
+lm <- train(x=predicttrain,
+            y=outcometrain,
+            method='lm',
+            trControl=trainControl(method="cv", number=10))
+
+lm
+
+
+```
+Train a partial least squares model using 10-fold cross-validation
+
+```{r}
+set.seed(111)
+pls <- train(x=predicttrain,
+             y=outcometrain,
+             method='pls',
+             trControl=trainControl(method="cv", number=10),
+             tuneLength=10)
+
+pls
+```
+
+
+Train a lasso regression model using 10-fold cross-validation
+
+```{r}
+set.seed(111)
+lasso <- train(x=predicttrain,
+               y=outcometrain,
+               method='lasso',
+               trControl=trainControl(method="cv", number=10),
+               tuneLength=10)
+
+lasso
+```
+
+6.1 d) Which model has the best predictive ability? Is any model significantly
+better or worse than the others?
+
+LASSO regularization and linear regression had the lowest cross-validation error (RMSE = 2.69) which were both superior to partial least squares (RMSE = 2.92) 
+
+
+6.1 e) Explain which model you would use for predicting the fat content of a sample.
+
+I would use linear regression as it's the more parsimonous model and has equivalent performance to the LASSO regression.
+
+
+6.2 a)
+
+```{r, warning=F, message=F}
+library(AppliedPredictiveModeling)
+
+```
+
+
+6.2 b) The fingerprint predictors indicate the presence or absence of substructures of a molecule and are often sparse meaning that relatively few of the molecules contain each substructure. Filter out the predictors that have low frequencies using the nearZeroVar function from the caret package.
+How many predictors are left for modeling?
+
+
+```{r}
+data("permeability")
+fingerprints <- fingerprints[,-nearZeroVar(fingerprints)]
+ncol(fingerprints)
+
+```
+719 predictors have low frequencies, 388 are left for modeling.
+
+
+6.2 c) Split the data into a training and a test set, pre-process the data, and tune a PLS model. How many latent variables are optimal and what is the corresponding resampled estimate of R2?
+
+```{r}
+histogram(permeability)
+
+```
+Heavily skewed, do log transformation
+
+```{r}
+permeability <- log(permeability)
+histogram(permeability)
+```
+
+```{r}
+set.seed(111)
+
+train <- createDataPartition(permeability,
+ p = 0.80, list = F)
+
+predicttrain <- fingerprints[train,]
+predicttest <- fingerprints[-train,]
+
+outcometrain <- permeability[train,]
+outcometest <- permeability[-train,]
+
+```
+
+
+```{r}
+set.seed(111)
+
+pls <- train(x = predicttrain, y = outcometrain,
+ method = "pls",
+ preProcess = c("center","scale"),
+ tuneLength=20,
+ trControl = trainControl(method="cv", number=10))
+
+pls
+
+```
+```{r}
+xyplot(outcometrain ~ predict(pls),
+  type = c("p", "g"),
+  xlab = "Predicted", ylab = "Observed")
+
+xyplot(resid(pls) ~ predict(pls),
+  type = c("p", "g"),
+  xlab = "Predicted", ylab = "Residuals")
+```
+10 latent variables achieve the lowest RMSE and highest R2.
+
+
+
+6.2 d) Predict the response for the test set. What is the test set estimate of R2?
+
+```{r}
+plspred <- predict(pls, predicttest)
+
+plsvalues  <- data.frame(obs = outcometest, pred = plspred)
+
+defaultSummary(plsvalues)
+
+```
+
+
+6.2 e) Try building other models discussed in this chapter. Do any have better predictive performance?
+
+
+Train a ridge regression using 5-fold cross-validation
+
+```{r}
+set.seed(111)
+
+# ridge <- train(x = predicttrain, y = outcometrain,
+#  method = "ridge",
+#  preProcess = c("center","scale"),
+#  tuneGrid = data.frame(.lambda = seq(0, .1, length = 15)),
+#  trControl = trainControl(method="cv", number=5))
+# 
+# save(ridge, file='ridge.RData')
+load('ridge.RData')
+
+ridge
+```
+
+RMSE = 1.29, R2 = 0.48
+
+```{r}
+ridgepred <- predict(ridge, predicttest)
+
+ridgevalues  <- data.frame(obs = outcometest, pred = ridgepred)
+
+defaultSummary(ridgevalues)
+
+```
+Ridge has worse R2 than PLS
+
+Train PCR model with 10-fold cross-validation
+
+```{r}
+set.seed(111)
+pcr <- train(x=predicttrain,
+             y=outcometrain,
+             preProcess = c("center","scale"),
+             method='pcr',
+             trControl=trainControl(method="cv", number=10),
+             tuneLength=10)
+
+pcr
+```
+RMSE = 1.28, R2 = 0.36
+
+```{r}
+pcrpred <- predict(pcr, predicttest)
+
+pcrvalues  <- data.frame(obs = outcometest, pred = pcrpred)
+
+defaultSummary(pcrvalues)
+
+```
+PCR has worse prediction than ridge regression and PLS
+
+Train elastic net model with 5-fold cross-validation
+
+```{r}
+set.seed(111)
+enet <- train(x=predicttrain,
+             y=outcometrain,
+             preProcess = c("center","scale"),
+             method='enet',
+             tuneGrid= expand.grid(.lambda = c(0, 0.01, .1), .fraction = seq(.05, 1, length = 10)),
+             trControl=trainControl(method="cv", number=5))
+
+enet
+```
+
+RMSE = 1.08, R2 = 0.55
+
+
+```{r}
+enetpred <- predict(enet, predicttest)
+
+enetvalues  <- data.frame(obs = outcometest, pred = enetpred)
+
+defaultSummary(enetvalues)
+
+```
+enet did not perform well on the testset? Maybe I did something wrong
+
+
+6.2 f) Would you recommend any of your models to replace the permeability
+laboratory experiment?
+
+
+PLS maybe as it had good performance
+
+
+7.4. Return to the permeability problem outlined in Exercise 6.2. Train several nonlinear regression models and evaluate the resampling and test set performance.
+
+Train a neural net using leave group out cross-validation
+
+```{r}
+
+# set.seed(111)
+# nnet <- train(predicttrain, outcometrain,
+#                   method = "nnet",
+#                   tuneGrid = expand.grid(size = c(1,3,5,7), decay = c(0, .01, .1)),
+#                   trControl = trainControl(method="LGOCV"),
+#                   preProc = c("center", "scale"),
+#                   linout = TRUE,
+#                   trace = FALSE,
+#                   MaxNWts = 10 * (ncol(predicttrain) + 1) + 10 + 1,
+#                   maxit = 500)
+# 
+# 
+# save(nnet, file='nnet.RData')
+# load('nnet.RData')
+# 
+# nnet
+# predict(nnet, predicttest)
+  
+  
+```
+Computer not fast enough to run
+
+
+Train a MARS model
+```{r}
+
+
+
+```
+
+```{r}
+# set.seed(111)
+# mars <- train(predicttrain, outcometrain,
+#              method = "earth",
+#              trControl = trainControl(method="LGOCV"),
+#              preProc = c("center", "scale"),
+#              tuneGrid = expand.grid(degree=1,nprune=2:30))
+# save(mars, file='mars.RData')
+load('mars.RData')
+
+mars
+
+marspred <- predict(mars, predicttest)
+marsvalues <- data.frame(obs=outcometest, pred=marspred)
+# defaultSummary(marsvalues)
+# Error in `[.data.frame`(data, , "pred") : undefined columns selected
+
+
+```
+
+RMSE = 1.1, R2 = 0.51
+
+
+Train support vector machine model
+```{r}
+set.seed(111)
+# svm <- train(predicttrain, outcometrain,
+#              method = "svmRadial",
+#              trControl = trainControl(method="LGOCV"),
+#              preProc = c("center", "scale"),
+#              tuneLength=10)
+# save(svm, file='svm.RData')
+load('svm.RData')
+
+svm
+
+svmpred <- predict(svm, predicttest)
+svmvalues <- data.frame(obs=outcometest, pred=svmpred)
+defaultSummary(svmvalues)
+
+```
+RMSE = 1.20, R2 = 0.45
+
+```{r}
+# set.seed(111)
+# knn <- train(predicttrain, outcometrain,
+#              method = "knn",
+#              trControl = trainControl(method="LGOCV"),
+#              preProc = c("center", "scale"),
+#              tuneGrid = data.frame(k=1:20))
+# 
+# save(knn, file='knn.RData')
+load('knn.RData')
+
+knn
+
+knnpred <- predict(knn, predicttest)
+knnvalues <- data.frame(obs=outcometest, pred=knnpred)
+defaultSummary(knnvalues)
+
+```
+RMSE = 1.39, R2 = 0.24
+
+
+
+a) Which nonlinear regression model gives the optimal resampling and test
+set performance?
+
+
+
+The MARS model had the best fit to the training data, but for some reason there was an error in calculating the prediction fit on the test data. SVM had greater prediction fit than KNN.
+
+
+
+
+b) Do any of the nonlinear models outperform the optimal linear model you previously developed in Exercise 6.2? If so, what might this tell you about the underlying relationship between the predictors and the response
+
+SVM outperformed PLS, so the relationship between predictors and response may be better characterized as nonlinear
+
+
+c) Would you recommend any of the models you have developed to replace the permeability laboratory experiment?
+
+Perhaps SVM or MARS
+
+
+
+

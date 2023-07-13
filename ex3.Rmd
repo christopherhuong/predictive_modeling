@@ -1,0 +1,155 @@
+---
+title: "ex3"
+author: "chris"
+date: "2023-07-03"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r, warning=F, message=F}
+library(caret)
+data(tecator)
+str(absorp)
+str(endpoints)
+```
+
+
+b)	In this example the predictors are the measurements at the individual frequencies. Because the frequencies lie in a systematic order (850–1,050nm), the predictors have a high degree of correlation. Hence, the data lie in a smaller dimension than the total number of predictors (215). Use PCA to determine the effective dimension of these data. What is the effective dimension?
+
+
+
+```{r}
+
+pc <- prcomp(absorp, center=T,scale=T)
+
+summary(pc)
+
+```
+
+The first principal explains 98.63% of the variance, thus the data is effectively unidimensional.
+
+
+
+c)	Split the data into a training and a test set the response of the percentage of moisture, pre-process the data, and build each variety of models described in this chapter. For those models with tuning parameters, what are the optimal values of the tuning parameter(s)?
+
+
+
+```{r}
+set.seed(111)
+train <- createDataPartition(endpoints[,1], p=.80, list=F)
+
+predicttrain <- as.data.frame(absorp[train,])
+predicttest <- as.data.frame(absorp[-train,])
+outcometrain <- endpoints[train, 1]
+outcometest <- endpoints[-train, 1]
+
+```
+
+Train models on 80% of the data. Outcome we are predicting is percentage of moisture.
+
+Train a linear regression model using 10-fold cross-validation
+
+```{r}
+set.seed(111)
+lm <- train(x=predicttrain,
+            y=outcometrain,
+            method='lm',
+            trControl=trainControl(method="cv", number=10))
+
+lm
+
+
+```
+
+Plot the observed (from testing set) vs predicted values (from training set).
+Plot residuals of the training model vs the predicted values. This should show no pattern.
+
+```{r}
+lmpred <- predict(lm, predicttest)
+
+xyplot(outcometrain ~ predict(lm),
+  type = c("p", "g"),
+  xlab = "Predicted", ylab = "Observed")
+
+xyplot(resid(lm) ~ predict(lm),
+  type = c("p", "g"),
+  xlab = "Predicted", ylab = "Residuals")
+```
+
+Looks pretty good.
+
+
+Train a principal components regression using 10-fold cross-validation
+
+```{r}
+set.seed(111)
+pcr <- train(x=predicttrain,
+             y=outcometrain,
+             method='pcr',
+             trControl=trainControl(method="cv", number=10),
+             tuneLength=10)
+
+pcr
+```
+
+Optimal principal components = 8
+
+```{r}
+pcrpred <- predict(pcr, predicttest)
+
+xyplot(outcometrain ~ predict(pcr),
+  type = c("p", "g"),
+  xlab = "Predicted", ylab = "Observed")
+
+xyplot(resid(pcr) ~ predict(pcr),
+  type = c("p", "g"),
+  xlab = "Predicted", ylab = "Residuals")
+
+```
+
+Some outliers at lower predicted values.
+
+
+Train a lasso regression model using 10-fold cross-validation
+
+
+```{r}
+set.seed(111)
+lasso <- train(x=predicttrain,
+               y=outcometrain,
+               method='lasso',
+               trControl=trainControl(method="cv", number=10),
+               tuneLength=10)
+
+lasso
+```
+Optimal value of fraction of full solution = 0.1
+
+```{r}
+lassopred <- predict(lasso, predicttest)
+
+xyplot(outcometrain ~ predict(lasso),
+  type = c("p", "g"),
+  xlab = "Predicted", ylab = "Observed")
+
+xyplot(resid(lasso) ~ predict(lasso),
+  type = c("p", "g"),
+  xlab = "Predicted", ylab = "Residuals")
+```
+Looks good
+
+
+d)	Which model has the best predictive ability? Is any model significantly better or worse than the others? 
+
+Lasso regression had the lowest cross-validation error (RMSE = 2.29), followed by linear regression (RMSE = 2.47), and PCR (RMSE = 2.67)
+
+
+e)	Explain which model you would use for predicting the percentage of moisture of a sample.
+
+I would use a lasso regression as this model had the best performance in predicting the values of the test set, had consistent performance across the range of values, and had the lowest RMSE of the prediction models.
+
+
+
+
+
