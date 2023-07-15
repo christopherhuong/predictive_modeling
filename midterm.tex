@@ -1,0 +1,824 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={midterm},
+  pdfauthor={Christopher Huong},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{midterm}
+\author{Christopher Huong}
+\date{2023-07-14}
+
+\begin{document}
+\maketitle
+
+\hypertarget{problem-4-total-18-points---3-points-each}{%
+\section{Problem 4 (Total: 18 Points - 3 points
+each)}\label{problem-4-total-18-points---3-points-each}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ISLR)}
+\FunctionTok{library}\NormalTok{(psych)}
+\FunctionTok{library}\NormalTok{(tidyverse)}
+\FunctionTok{data}\NormalTok{(}\StringTok{"Auto"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\tightlist
+\item
+  Which of the predictors are quantitative, and which are qualitative?
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Auto }\OtherTok{\textless{}{-}} \FunctionTok{na.omit}\NormalTok{(Auto)}
+\FunctionTok{str}\NormalTok{(Auto)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 'data.frame':    392 obs. of  9 variables:
+##  $ mpg         : num  18 15 18 16 17 15 14 14 14 15 ...
+##  $ cylinders   : num  8 8 8 8 8 8 8 8 8 8 ...
+##  $ displacement: num  307 350 318 304 302 429 454 440 455 390 ...
+##  $ horsepower  : num  130 165 150 150 140 198 220 215 225 190 ...
+##  $ weight      : num  3504 3693 3436 3433 3449 ...
+##  $ acceleration: num  12 11.5 11 12 10.5 10 9 8.5 10 8.5 ...
+##  $ year        : num  70 70 70 70 70 70 70 70 70 70 ...
+##  $ origin      : num  1 1 1 1 1 1 1 1 1 1 ...
+##  $ name        : Factor w/ 304 levels "amc ambassador brougham",..: 49 36 231 14 161 141 54 223 241 2 ...
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{table}\NormalTok{(Auto}\SpecialCharTok{$}\NormalTok{origin)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##   1   2   3 
+## 245  68  79
+\end{verbatim}
+
+It seems that origin and name are qualitative, and the rest are
+quantitative predictors.
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  What is the range of each quantitative predictor? You can answer this
+  using the range() function.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{range}\NormalTok{(Auto[,}\DecValTok{1}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1]  9.0 46.6
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{range}\NormalTok{(Auto[,}\DecValTok{2}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 3 8
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{range}\NormalTok{(Auto[,}\DecValTok{3}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1]  68 455
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{range}\NormalTok{(Auto[,}\DecValTok{4}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1]  46 230
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{range}\NormalTok{(Auto[,}\DecValTok{5}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1613 5140
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{range}\NormalTok{(Auto[,}\DecValTok{6}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1]  8.0 24.8
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{range}\NormalTok{(Auto[,}\DecValTok{7}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 70 82
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  What is the mean and standard deviation of each quantitative
+  predictor?
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{describe}\NormalTok{(Auto[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{7}\NormalTok{])[,}\DecValTok{3}\SpecialCharTok{:}\DecValTok{4}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                 mean     sd
+## mpg            23.45   7.81
+## cylinders       5.47   1.71
+## displacement  194.41 104.64
+## horsepower    104.47  38.49
+## weight       2977.58 849.40
+## acceleration   15.54   2.76
+## year           75.98   3.68
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  Now remove the 20th through 80th observations. What is the range,
+  mean, and standard deviation of each predictor in the subset of the
+  data that remains?
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Auto2 }\OtherTok{\textless{}{-}}\NormalTok{ Auto[}\SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(}\DecValTok{20}\SpecialCharTok{:}\DecValTok{80}\NormalTok{),]}
+\FunctionTok{describe}\NormalTok{(Auto2[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{7}\NormalTok{])[,}\DecValTok{3}\SpecialCharTok{:}\DecValTok{4}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                 mean     sd
+## mpg            24.22   7.82
+## cylinders       5.40   1.67
+## displacement  189.44 101.76
+## horsepower    101.86  36.60
+## weight       2935.02 805.48
+## acceleration   15.61   2.76
+## year           76.85   3.32
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{4}
+\tightlist
+\item
+  Using the full data set, investigate the predictors graphically, using
+  scatterplots or other tools of your choice. Create some plots
+  highlighting the relationships among the predictors. Comment on your
+  findings.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{vars\_list }\OtherTok{\textless{}{-}} \FunctionTok{as.list}\NormalTok{(}\FunctionTok{colnames}\NormalTok{(}\FunctionTok{select}\NormalTok{(Auto,}\SpecialCharTok{{-}}\NormalTok{name)))}
+
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow=}\FunctionTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{,}\DecValTok{3}\NormalTok{))}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in}\NormalTok{ vars\_list)\{}\FunctionTok{hist}\NormalTok{(}\FunctionTok{select}\NormalTok{(Auto,}\SpecialCharTok{{-}}\NormalTok{name)[,i],}\AttributeTok{xlab=}\NormalTok{i,}\AttributeTok{main=}\StringTok{""}\NormalTok{)\}}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{midterm_files/figure-latex/unnamed-chunk-6-1.pdf} mpg
+seems a bit right-skewed. 4-cylinders is the most common. Displacement,
+horsepower, and weight seems heavily right-skewed. Acceleration seems
+normally distributed. year seems uniformly distributed. 1 is the most
+common origin.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{plot}\NormalTok{(Auto[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{7}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{midterm_files/figure-latex/unnamed-chunk-7-1.pdf}
+Predictors that seem highly correlated with mpg are cylinders,
+displacement, horsepower, and weight. Other correlated predictors are
+displacement + horsepower, displacement + weight, displacement +
+acceleration, horsepower + weight, and horsepower + acceleration.
+Basically there is high colinearity in this data set.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cor}\NormalTok{(Auto[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{7}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                     mpg  cylinders displacement horsepower     weight
+## mpg           1.0000000 -0.7776175   -0.8051269 -0.7784268 -0.8322442
+## cylinders    -0.7776175  1.0000000    0.9508233  0.8429834  0.8975273
+## displacement -0.8051269  0.9508233    1.0000000  0.8972570  0.9329944
+## horsepower   -0.7784268  0.8429834    0.8972570  1.0000000  0.8645377
+## weight       -0.8322442  0.8975273    0.9329944  0.8645377  1.0000000
+## acceleration  0.4233285 -0.5046834   -0.5438005 -0.6891955 -0.4168392
+## year          0.5805410 -0.3456474   -0.3698552 -0.4163615 -0.3091199
+##              acceleration       year
+## mpg             0.4233285  0.5805410
+## cylinders      -0.5046834 -0.3456474
+## displacement   -0.5438005 -0.3698552
+## horsepower     -0.6891955 -0.4163615
+## weight         -0.4168392 -0.3091199
+## acceleration    1.0000000  0.2903161
+## year            0.2903161  1.0000000
+\end{verbatim}
+
+As suspected, the predictors are highly correlated.
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{5}
+\tightlist
+\item
+  Suppose that we wish to predict gas mileage (mpg) on the basis of the
+  other variables. Do your plots suggest that any of the other variables
+  might be useful in predicting mpg? Justify your answer.
+\end{enumerate}
+
+Yes, the predictors that are highly related to mpg are cylinders,
+displacement, horsepower, and weight. These predictors are also all
+related to each other, so using a dimension reduction technique may be
+useful.
+
+\hypertarget{problem-5-total-22-points}{%
+\section{Problem 5 (Total: 22 Points)}\label{problem-5-total-22-points}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(AppliedPredictiveModeling)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'AppliedPredictiveModeling' was built under R version 4.2.3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{data}\NormalTok{(}\StringTok{"ChemicalManufacturingProcess"}\NormalTok{)}
+
+\NormalTok{dat }\OtherTok{\textless{}{-}}\NormalTok{ ChemicalManufacturingProcess}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\tightlist
+\item
+  A small percentage of cells in the predictor set contain missing
+  values. Use an appropriate imputation function to fill in these
+  missing values. {[}3 points{]}
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(mice)}
+
+\CommentTok{\# dat\_imp \textless{}{-} mice(dat, maxit=3,m=3, seed=333) }
+\CommentTok{\# too computationally demanding, will just drop all missing values }
+
+\NormalTok{dat }\OtherTok{\textless{}{-}} \FunctionTok{na.omit}\NormalTok{(dat)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Split the data into a training and a test set, pre-process the data,
+  and build at least four different models from Chapter 6. For those
+  models with tuning parameters (e.g., ENET), what are the optimal
+  values of the tuning parameter(s)? {[}8 points{]}
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(caret)}
+\FunctionTok{library}\NormalTok{(earth)}
+
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{111}\NormalTok{)}
+
+\NormalTok{train }\OtherTok{\textless{}{-}} \FunctionTok{createDataPartition}\NormalTok{(dat[,}\DecValTok{1}\NormalTok{], }\AttributeTok{p=}\NormalTok{.}\DecValTok{80}\NormalTok{, }\AttributeTok{list=}\NormalTok{F)}
+
+\NormalTok{predicttrain }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(dat[train,}\DecValTok{2}\SpecialCharTok{:}\DecValTok{58}\NormalTok{])}
+\NormalTok{predicttest }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(dat[}\SpecialCharTok{{-}}\NormalTok{train,}\DecValTok{2}\SpecialCharTok{:}\DecValTok{58}\NormalTok{])}
+\NormalTok{outcometrain }\OtherTok{\textless{}{-}}\NormalTok{ dat[train, }\DecValTok{1}\NormalTok{]}
+\NormalTok{outcometest }\OtherTok{\textless{}{-}}\NormalTok{ dat[}\SpecialCharTok{{-}}\NormalTok{train, }\DecValTok{1}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+Train a linear regression model using 10-fold cross-validation, mean
+centering, scaling, and pca reduction
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{111}\NormalTok{)}
+\NormalTok{lm }\OtherTok{\textless{}{-}} \FunctionTok{train}\NormalTok{(}\AttributeTok{x=}\NormalTok{predicttrain,}
+            \AttributeTok{y=}\NormalTok{outcometrain,}
+            \AttributeTok{preProcess =} \FunctionTok{c}\NormalTok{(}\StringTok{"center"}\NormalTok{,}\StringTok{"scale"}\NormalTok{,}\StringTok{"pca"}\NormalTok{),}
+            \AttributeTok{method=}\StringTok{\textquotesingle{}lm\textquotesingle{}}\NormalTok{,}
+            \AttributeTok{trControl=}\FunctionTok{trainControl}\NormalTok{(}\AttributeTok{method=}\StringTok{"cv"}\NormalTok{, }\AttributeTok{number=}\DecValTok{10}\NormalTok{))}
+
+\NormalTok{lm}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Linear Regression 
+## 
+## 124 samples
+##  57 predictor
+## 
+## Pre-processing: centered (57), scaled (57), principal component
+##  signal extraction (57) 
+## Resampling: Cross-Validated (10 fold) 
+## Summary of sample sizes: 112, 112, 112, 112, 112, 112, ... 
+## Resampling results:
+## 
+##   RMSE      Rsquared   MAE     
+##   2.022703  0.5378034  1.269326
+## 
+## Tuning parameter 'intercept' was held constant at a value of TRUE
+\end{verbatim}
+
+RMSE = 2.02, R2 = 0.54
+
+Train elastic net model with 5-fold cross-validation, centering,
+scaling, and pca reduction
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{111}\NormalTok{)}
+\NormalTok{enet }\OtherTok{\textless{}{-}} \FunctionTok{train}\NormalTok{(}\AttributeTok{x=}\NormalTok{predicttrain,}
+             \AttributeTok{y=}\NormalTok{outcometrain,}
+             \AttributeTok{preProcess =} \FunctionTok{c}\NormalTok{(}\StringTok{"center"}\NormalTok{,}\StringTok{"scale"}\NormalTok{,}\StringTok{"pca"}\NormalTok{),}
+             \AttributeTok{method=}\StringTok{\textquotesingle{}enet\textquotesingle{}}\NormalTok{,}
+             \AttributeTok{tuneGrid=} \FunctionTok{expand.grid}\NormalTok{(}\AttributeTok{.lambda =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\FloatTok{0.01}\NormalTok{, .}\DecValTok{1}\NormalTok{), }\AttributeTok{.fraction =} \FunctionTok{seq}\NormalTok{(.}\DecValTok{05}\NormalTok{, }\DecValTok{1}\NormalTok{, }\AttributeTok{length =} \DecValTok{10}\NormalTok{)),}
+             \AttributeTok{trControl=}\FunctionTok{trainControl}\NormalTok{(}\AttributeTok{method=}\StringTok{"cv"}\NormalTok{, }\AttributeTok{number=}\DecValTok{5}\NormalTok{))}
+
+\NormalTok{enet}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Elasticnet 
+## 
+## 124 samples
+##  57 predictor
+## 
+## Pre-processing: centered (57), scaled (57), principal component
+##  signal extraction (57) 
+## Resampling: Cross-Validated (5 fold) 
+## Summary of sample sizes: 99, 99, 100, 99, 99 
+## Resampling results across tuning parameters:
+## 
+##   lambda  fraction   RMSE      Rsquared   MAE     
+##   0.00    0.0500000  1.692612  0.2716166  1.392080
+##   0.00    0.1555556  1.513049  0.4205701  1.246422
+##   0.00    0.2611111  1.407004  0.4803133  1.155392
+##   0.00    0.3666667  1.272371  0.5685035  1.042056
+##   0.00    0.4722222  1.313006  0.5260962  1.038660
+##   0.00    0.5777778  1.468802  0.4926490  1.070700
+##   0.00    0.6833333  1.615362  0.4774628  1.099206
+##   0.00    0.7888889  1.785173  0.4662887  1.128226
+##   0.00    0.8944444  1.939039  0.4562179  1.158276
+##   0.00    1.0000000  2.118992  0.4452731  1.205547
+##   0.01    0.0500000  1.692612  0.2716166  1.392080
+##   0.01    0.1555556  1.513049  0.4205701  1.246422
+##   0.01    0.2611111  1.407004  0.4803133  1.155392
+##   0.01    0.3666667  1.272371  0.5685035  1.042056
+##   0.01    0.4722222  1.313006  0.5260962  1.038660
+##   0.01    0.5777778  1.468802  0.4926490  1.070700
+##   0.01    0.6833333  1.615362  0.4774628  1.099206
+##   0.01    0.7888889  1.785173  0.4662887  1.128226
+##   0.01    0.8944444  1.939039  0.4562179  1.158276
+##   0.01    1.0000000  2.118992  0.4452731  1.205547
+##   0.10    0.0500000  1.692612  0.2716166  1.392080
+##   0.10    0.1555556  1.513049  0.4205701  1.246422
+##   0.10    0.2611111  1.407004  0.4803133  1.155392
+##   0.10    0.3666667  1.272371  0.5685035  1.042056
+##   0.10    0.4722222  1.313006  0.5260962  1.038660
+##   0.10    0.5777778  1.468802  0.4926490  1.070700
+##   0.10    0.6833333  1.615362  0.4774628  1.099206
+##   0.10    0.7888889  1.785173  0.4662887  1.128226
+##   0.10    0.8944444  1.939039  0.4562179  1.158276
+##   0.10    1.0000000  2.118992  0.4452731  1.205547
+## 
+## RMSE was used to select the optimal model using the smallest value.
+## The final values used for the model were fraction = 0.3666667 and lambda = 0.1.
+\end{verbatim}
+
+Best tuning parameters: fraction = 0.3666667 and lambda = 0.1. RMSE =
+1.27, R2 = 0.57
+
+Train a partial least squares model using 5-fold cross-validation, mean
+centering, scaling, and pca reduction
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{111}\NormalTok{)}
+\NormalTok{pls }\OtherTok{\textless{}{-}} \FunctionTok{train}\NormalTok{(}\AttributeTok{x=}\NormalTok{predicttrain,}
+             \AttributeTok{y=}\NormalTok{outcometrain,}
+             \AttributeTok{preProcess =} \FunctionTok{c}\NormalTok{(}\StringTok{"center"}\NormalTok{,}\StringTok{"scale"}\NormalTok{,}\StringTok{"pca"}\NormalTok{),}
+             \AttributeTok{method=}\StringTok{\textquotesingle{}pls\textquotesingle{}}\NormalTok{,}
+             \AttributeTok{trControl=}\FunctionTok{trainControl}\NormalTok{(}\AttributeTok{method=}\StringTok{"cv"}\NormalTok{, }\AttributeTok{number=}\DecValTok{5}\NormalTok{),}
+             \AttributeTok{tuneLength=}\DecValTok{10}\NormalTok{)}
+
+\NormalTok{pls}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Partial Least Squares 
+## 
+## 124 samples
+##  57 predictor
+## 
+## Pre-processing: centered (57), scaled (57), principal component
+##  signal extraction (57) 
+## Resampling: Cross-Validated (5 fold) 
+## Summary of sample sizes: 99, 99, 100, 99, 99 
+## Resampling results across tuning parameters:
+## 
+##   ncomp  RMSE      Rsquared   MAE     
+##    1     1.478104  0.4294234  1.153437
+##    2     1.301414  0.5270782  1.036109
+##    3     1.460432  0.5106712  1.058622
+##    4     1.590515  0.4822214  1.086996
+##    5     1.929150  0.4525423  1.170811
+##    6     2.017962  0.4433364  1.189270
+##    7     2.127957  0.4409885  1.209252
+##    8     2.137412  0.4419235  1.211728
+##    9     2.120014  0.4434193  1.206942
+##   10     2.119472  0.4447445  1.206037
+## 
+## RMSE was used to select the optimal model using the smallest value.
+## The final value used for the model was ncomp = 2.
+\end{verbatim}
+
+Best tuning parameters: 2 principal components
+
+RMSE = 1.30, R2 = 0.53
+
+Train a lasso regression model using 5-fold cross-validation, mean
+centering, scaling, and pca reduction
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{111}\NormalTok{)}
+\NormalTok{lasso }\OtherTok{\textless{}{-}} \FunctionTok{train}\NormalTok{(}\AttributeTok{x=}\NormalTok{predicttrain,}
+               \AttributeTok{y=}\NormalTok{outcometrain,}
+               \AttributeTok{preProcess =} \FunctionTok{c}\NormalTok{(}\StringTok{"center"}\NormalTok{,}\StringTok{"scale"}\NormalTok{,}\StringTok{"pca"}\NormalTok{),}
+               \AttributeTok{method=}\StringTok{\textquotesingle{}lasso\textquotesingle{}}\NormalTok{,}
+               \AttributeTok{trControl=}\FunctionTok{trainControl}\NormalTok{(}\AttributeTok{method=}\StringTok{"cv"}\NormalTok{, }\AttributeTok{number=}\DecValTok{5}\NormalTok{),}
+               \AttributeTok{tuneLength=}\DecValTok{10}\NormalTok{)}
+
+\NormalTok{lasso}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## The lasso 
+## 
+## 124 samples
+##  57 predictor
+## 
+## Pre-processing: centered (57), scaled (57), principal component
+##  signal extraction (57) 
+## Resampling: Cross-Validated (5 fold) 
+## Summary of sample sizes: 99, 99, 100, 99, 99 
+## Resampling results across tuning parameters:
+## 
+##   fraction   RMSE      Rsquared   MAE     
+##   0.1000000  1.596454  0.3654209  1.318927
+##   0.1888889  1.473699  0.4409874  1.216656
+##   0.2777778  1.392393  0.4907973  1.138702
+##   0.3666667  1.272371  0.5685035  1.042056
+##   0.4555556  1.298595  0.5328206  1.036542
+##   0.5444444  1.417668  0.5004990  1.059598
+##   0.6333333  1.552328  0.4829102  1.088492
+##   0.7222222  1.669791  0.4735901  1.107288
+##   0.8111111  1.822087  0.4637489  1.134843
+##   0.9000000  1.947905  0.4557028  1.160134
+## 
+## RMSE was used to select the optimal model using the smallest value.
+## The final value used for the model was fraction = 0.3666667.
+\end{verbatim}
+
+Best tuning parameters: fraction = 0.3666667
+
+RMSE = 1.27, R2 = 0.57
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  Which model has the best predictive ability? Is any model
+  significantly better or worse than the others? You need to conduct a
+  hypothesis testing to justify your choice if necessary. {[}5 points{]}
+\end{enumerate}
+
+The enet and lasso regression had the best predictive ability. Both were
+not significantly different from each other and both were significantly
+better than the linear regression
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lmpred }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(lm, predicttest)}
+
+\NormalTok{lmvalues  }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{obs =}\NormalTok{ outcometest, }\AttributeTok{pred =}\NormalTok{ lmpred)}
+
+\FunctionTok{defaultSummary}\NormalTok{(lmvalues)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      RMSE  Rsquared       MAE 
+## 1.4136563 0.5403592 1.1886276
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{enetpred }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(enet, predicttest)}
+
+\NormalTok{enetvalues  }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{obs =}\NormalTok{ outcometest, }\AttributeTok{pred =}\NormalTok{ enetpred)}
+
+\FunctionTok{defaultSummary}\NormalTok{(enetvalues)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      RMSE  Rsquared       MAE 
+## 1.5893585 0.4934902 1.2136965
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lassopred }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(lasso, predicttest)}
+
+\NormalTok{lassovalues  }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{obs =}\NormalTok{ outcometest, }\AttributeTok{pred =}\NormalTok{ lassopred)}
+
+\FunctionTok{defaultSummary}\NormalTok{(lassovalues)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      RMSE  Rsquared       MAE 
+## 1.5893585 0.4934902 1.2136965
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  Which predictors are most important in the model you have trained? Do
+  either the biological or process predictors dominate the list {[}3
+  points{]}
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{111}\NormalTok{)}
+
+\FunctionTok{varImp}\NormalTok{(lasso)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## loess r-squared variable importance
+## 
+##   only 20 most important variables shown (out of 57)
+## 
+##                        Overall
+## ManufacturingProcess13  100.00
+## ManufacturingProcess32   88.52
+## BiologicalMaterial06     84.09
+## ManufacturingProcess17   82.04
+## BiologicalMaterial03     76.26
+## ManufacturingProcess36   73.62
+## ManufacturingProcess09   70.32
+## BiologicalMaterial04     68.77
+## BiologicalMaterial02     62.05
+## BiologicalMaterial01     56.79
+## BiologicalMaterial12     55.86
+## ManufacturingProcess06   54.47
+## BiologicalMaterial08     49.72
+## ManufacturingProcess29   43.90
+## BiologicalMaterial09     43.44
+## ManufacturingProcess11   40.57
+## ManufacturingProcess33   38.91
+## ManufacturingProcess30   37.92
+## BiologicalMaterial11     36.47
+## ManufacturingProcess20   34.29
+\end{verbatim}
+
+It seems that process variables are the most important predictors
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{4}
+\tightlist
+\item
+  Explore the relationships between each of the top predictors and the
+  response. How could this information be helpful in improving yield in
+  future runs of the manufacturing process? {[}3 points{]}
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cor}\NormalTok{(dat}\SpecialCharTok{$}\NormalTok{Yield, dat}\SpecialCharTok{$}\NormalTok{ManufacturingProcess13)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] -0.5475796
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cor}\NormalTok{(dat}\SpecialCharTok{$}\NormalTok{Yield, dat}\SpecialCharTok{$}\NormalTok{ManufacturingProcess32)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.5727888
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cor}\NormalTok{(dat}\SpecialCharTok{$}\NormalTok{Yield, dat}\SpecialCharTok{$}\NormalTok{BiologicalMaterial06)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.4544859
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cor}\NormalTok{(dat}\SpecialCharTok{$}\NormalTok{Yield, dat}\SpecialCharTok{$}\NormalTok{ManufacturingProcess17)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] -0.4898141
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cor}\NormalTok{(dat}\SpecialCharTok{$}\NormalTok{Yield, dat}\SpecialCharTok{$}\NormalTok{BiologicalMaterial03)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.4581014
+\end{verbatim}
+
+The most important predictors tend to be more correlated with the
+response variable. This could be helpful because it's a simple way to
+gauge how likely a variable is to contribute significantly to a
+predictive model.
+
+\end{document}

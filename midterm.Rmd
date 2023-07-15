@@ -1,0 +1,270 @@
+---
+title: "midterm"
+author: "Christopher Huong"
+date: "`r Sys.Date()`"
+output:
+  word_document: default
+  html_document:
+    df_print: paged
+---
+# Problem 4 (Total: 18 Points - 3 points each)
+
+```{r, warning=F, message=F}
+library(ISLR)
+library(psych)
+library(tidyverse)
+data("Auto")
+```
+
+(a) Which of the predictors are quantitative, and which are qualitative?
+
+```{r}
+
+Auto <- na.omit(Auto)
+str(Auto)
+table(Auto$origin)
+```
+
+It seems that origin and name are qualitative, and the rest are quantitative predictors.
+
+(b) What is the range of each quantitative predictor? You can answer this using the range()
+function.
+
+```{r}
+
+range(Auto[,1])
+range(Auto[,2])
+range(Auto[,3])
+range(Auto[,4])
+range(Auto[,5])
+range(Auto[,6])
+range(Auto[,7])
+
+```
+
+(c) What is the mean and standard deviation of each quantitative predictor?
+
+```{r}
+describe(Auto[,1:7])[,3:4]
+
+```
+
+(d) Now remove the 20th through 80th observations. What is the range, mean, and standard deviation of each predictor in the subset of the data that remains?
+
+```{r}
+Auto2 <- Auto[-c(20:80),]
+describe(Auto2[,1:7])[,3:4]
+```
+
+(e) Using the full data set, investigate the predictors graphically, using scatterplots or other tools of your choice. Create some plots highlighting the relationships among the predictors. Comment on your findings.
+
+```{r}
+vars_list <- as.list(colnames(select(Auto,-name)))
+
+par(mfrow=c(3,3))
+for(i in vars_list){hist(select(Auto,-name)[,i],xlab=i,main="")}
+
+```
+mpg seems a bit right-skewed. 4-cylinders is the most common. Displacement, horsepower, and weight seems heavily right-skewed. Acceleration seems normally distributed. year seems uniformly distributed. 1 is the most common origin.
+
+```{r}
+plot(Auto[,1:7])
+
+```
+Predictors that seem highly correlated with mpg are cylinders, displacement, horsepower, and weight. Other correlated predictors are displacement + horsepower, displacement + weight, displacement + acceleration, horsepower + weight, and horsepower + acceleration. Basically there is high colinearity in this data set.
+
+```{r}
+cor(Auto[,1:7])
+
+```
+
+As suspected, the predictors are highly correlated.
+
+
+(f) Suppose that we wish to predict gas mileage (mpg) on the basis of the other variables. Do your plots suggest that any of the other variables might be useful in predicting mpg? Justify your answer.
+
+
+Yes, the predictors that are highly related to mpg are cylinders, displacement, horsepower, and weight. These predictors are also all related to each other, so using a dimension reduction technique may be useful.
+
+
+
+# Problem 5 (Total: 22 Points)
+
+```{r}
+library(AppliedPredictiveModeling)
+data("ChemicalManufacturingProcess")
+
+dat <- ChemicalManufacturingProcess
+```
+
+(a) A small percentage of cells in the predictor set contain missing values. Use an appropriate imputation function to fill in these missing values. [3 points]
+
+
+```{r, warning=F, message=F}
+library(mice)
+
+# dat_imp <- mice(dat, maxit=3,m=3, seed=333) 
+# too computationally demanding, will just drop all missing values 
+
+dat <- na.omit(dat)
+```
+
+
+(b) Split the data into a training and a test set, pre-process the data, and build at least
+four different models from Chapter 6. For those models with tuning parameters (e.g.,
+ENET), what are the optimal values of the tuning parameter(s)? [8 points]
+
+
+```{r, warning=F, message=F}
+library(caret)
+library(earth)
+
+set.seed(111)
+
+train <- createDataPartition(dat[,1], p=.80, list=F)
+
+predicttrain <- as.data.frame(dat[train,2:58])
+predicttest <- as.data.frame(dat[-train,2:58])
+outcometrain <- dat[train, 1]
+outcometest <- dat[-train, 1]
+
+```
+Train a linear regression model using 10-fold cross-validation, mean centering, scaling, and pca reduction
+
+```{r}
+set.seed(111)
+lm <- train(x=predicttrain,
+            y=outcometrain,
+            preProcess = c("center","scale","pca"),
+            method='lm',
+            trControl=trainControl(method="cv", number=10))
+
+lm
+
+
+```
+RMSE = 2.02, R2 = 0.54
+
+
+Train elastic net model with 5-fold cross-validation, centering, scaling, and pca reduction
+
+```{r}
+set.seed(111)
+enet <- train(x=predicttrain,
+             y=outcometrain,
+             preProcess = c("center","scale","pca"),
+             method='enet',
+             tuneGrid= expand.grid(.lambda = c(0, 0.01, .1), .fraction = seq(.05, 1, length = 10)),
+             trControl=trainControl(method="cv", number=5))
+
+enet
+```
+
+Best tuning parameters: fraction = 0.3666667 and lambda = 0.1.
+RMSE = 1.27, R2 = 0.57
+
+
+Train a partial least squares model using 5-fold cross-validation, mean centering, scaling, and pca reduction
+
+```{r}
+set.seed(111)
+pls <- train(x=predicttrain,
+             y=outcometrain,
+             preProcess = c("center","scale","pca"),
+             method='pls',
+             trControl=trainControl(method="cv", number=5),
+             tuneLength=10)
+
+pls
+```
+Best tuning parameters: 2 principal components
+
+RMSE = 1.30, R2 = 0.53
+
+
+
+
+Train a lasso regression model using 5-fold cross-validation, mean centering, scaling, and pca reduction
+
+
+```{r}
+set.seed(111)
+lasso <- train(x=predicttrain,
+               y=outcometrain,
+               preProcess = c("center","scale","pca"),
+               method='lasso',
+               trControl=trainControl(method="cv", number=5),
+               tuneLength=10)
+
+lasso
+```
+Best tuning parameters: fraction = 0.3666667
+
+RMSE = 1.27, R2 = 0.57
+
+
+(c) Which model has the best predictive ability? Is any model significantly better or worse
+than the others? You need to conduct a hypothesis testing to justify your choice if
+necessary. [5 points]
+
+
+
+The enet and lasso regression had the best predictive ability. Both were not significantly different from each other and both were significantly better than the linear regression
+
+
+
+```{r}
+lmpred <- predict(lm, predicttest)
+
+lmvalues  <- data.frame(obs = outcometest, pred = lmpred)
+
+defaultSummary(lmvalues)
+
+```
+```{r}
+enetpred <- predict(enet, predicttest)
+
+enetvalues  <- data.frame(obs = outcometest, pred = enetpred)
+
+defaultSummary(enetvalues)
+
+```
+
+```{r}
+lassopred <- predict(lasso, predicttest)
+
+lassovalues  <- data.frame(obs = outcometest, pred = lassopred)
+
+defaultSummary(lassovalues)
+
+```
+
+(d) Which predictors are most important in the model you have trained? Do either the
+biological or process predictors dominate the list [3 points]
+
+
+```{r}
+set.seed(111)
+
+varImp(lasso)
+
+```
+
+It seems that process variables are the most important predictors
+
+
+
+(e) Explore the relationships between each of the top predictors and the response. How
+could this information be helpful in improving yield in future runs of the manufacturing
+process? [3 points]
+
+
+```{r}
+cor(dat$Yield, dat$ManufacturingProcess13)
+cor(dat$Yield, dat$ManufacturingProcess32)
+cor(dat$Yield, dat$BiologicalMaterial06)
+cor(dat$Yield, dat$ManufacturingProcess17)
+cor(dat$Yield, dat$BiologicalMaterial03)
+```
+
+The most important predictors tend to be more correlated with the response variable. This could be helpful because it's a simple way to gauge how likely a variable is to contribute significantly to a predictive model.
