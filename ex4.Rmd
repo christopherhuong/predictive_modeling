@@ -1,0 +1,105 @@
+---
+title: "ex4"
+author: "Christopher Huong"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r, message=F,warning=F}
+library(mlbench)
+library(caret)
+```
+
+```{r}
+set.seed(200)
+trainingData <- mlbench.friedman1(200, sd = 1)
+## We convert the 'x' data from a matrix to a data frame
+## One reason is that this will give the columns names.
+trainingData$x <- data.frame(trainingData$x)
+
+## Look at the data using
+## featurePlot(trainingData$x, trainingData$y)
+## or other methods.
+
+## This creates a list with a vector 'y' and a matrix
+## of predictors 'x'. Also simulate a large test set to
+## estimate the true error rate with good precision:
+testData <- mlbench.friedman1(5000, sd = 1)
+testData$x <- data.frame(testData$x)
+```
+Tune several models on these data. For example:
+
+```{r}
+
+set.seed(921)
+knnModel <- train(x = trainingData$x,
+  y = trainingData$y,
+  method = "knn",
+  preProc = c("center", "scale"),
+  tuneLength = 10)
+
+knnModel
+
+knnPred <- predict(knnModel, newdata = testData$x)
+
+## The function 'postResample' can be used to get the test set
+## perforamnce values
+postResample(pred = knnPred, obs = testData$y)
+
+
+```
+
+KNN test performance RMSE = 3.23, R2 = 0.69
+
+Train SVM
+
+```{r}
+set.seed(111)
+svm <- train(x=trainingData$x, y=trainingData$y,
+             method = "svmRadial",
+             preProc = c("center", "scale"),
+             tuneLength=10)
+# save(svm, file='svm.RData')
+# load('svm.RData')
+
+svm
+
+svmpred <- predict(svm, newdata = testData$x)
+
+postResample(pred = svmpred, obs = testData$y)
+```
+SVM test performance RMSE = 2.08, R2 = 0.83
+
+Train MARS
+
+```{r}
+set.seed(111)
+mars <- train(x=trainingData$x, y=trainingData$y,
+             method = "earth",
+             preProc = c("center", "scale"),
+             tuneGrid = expand.grid(degree = 1:2, nprune = seq(2,14,by=2)))
+save(mars, file='mars.RData')
+load('mars.RData')
+
+
+mars
+
+marspred <- predict(mars, newdata = testData$x)
+
+postResample(pred = marspred, obs = testData$y)
+
+```
+MARS test performance RMSE = 1.32, R2 = 0.93
+
+Check which predicts were in important in the model
+
+```{r}
+varImp(mars)
+
+```
+
+The MARS model gives the best performance and did indeed choose the best predictors (X1,X4,X2,X5)
+
+
