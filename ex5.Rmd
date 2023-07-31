@@ -1,0 +1,190 @@
+---
+title: "ex5"
+author: "Christopher Huong"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+
+
+```{r, warning=F,message=F}
+library(ISLR)
+library(caret)
+library(tidyverse)
+library(psych)
+library(pls)
+```
+
+Predicting "Direction" with logistic regression
+```{r}
+data(Weekly)
+
+str(Weekly)
+glimpse(Weekly)
+```
+
+```{r}
+describe(Weekly)[,c(3,4,5,8,9,11,12)]
+table(Weekly$Year)
+```
+
+
+```{r}
+
+vars_list <- as.list(colnames(select(Weekly,-Direction)))
+
+par(mfrow=c(3,3))
+for(i in vars_list){hist(select(Weekly,-Direction)[,i],xlab=i,main="")}
+
+```
+
+
+
+The year ranges from 1990 to 2010 with a roughly uniform distribution.
+All the Lag variables have roughly equivalent distributions (mean, median, range, sd)
+Only the volume variable has significant skewness. A log transformation may be indicated. 
+Most variables are relatively kurtotic (wider distribution).
+
+```{r}
+Weekly$logVolume <- log(Weekly$Volume)
+hist(Weekly$logVolume)
+skew(Weekly$logVolume)
+
+```
+Better
+
+```{r}
+barplot(prop.table(table(Weekly$Direction)))
+
+```
+
+
+The response variable is binary and roughly equally distributed.
+
+```{r}
+mod1 <- glm(Direction ~ Lag1+Lag2+Lag3+Lag4+Lag5+logVolume,
+            data = Weekly,
+            family = "binomial")
+
+summary(mod1)
+```
+
+Only the Lag2 variable is a statistically significant predictor of Direction (p<0.05)
+
+
+
+```{r}
+set.seed(123)
+ctrl <- trainControl(method = "LGOCV",
+                     summaryFunction = twoClassSummary,
+                     classProbs = TRUE,
+                     savePredictions = T)
+
+
+predictors <- select(Weekly,c(Lag1,Lag2,Lag3,Lag4,Lag5,logVolume))
+
+mod2 <- train(x=predictors, y=Weekly$Direction,
+                     method = "glm",
+                     metric = "ROC",
+                     trControl = ctrl)
+
+mod2           
+
+```
+```{r}
+confusionMatrix(data = mod2$pred$pred,
+ reference = mod2$pred$obs)
+```
+The logistic regression shows low sensitivity (lots of false negatives / low true positives) and high specificity (high true negatives / low false positives). The accuracy is 0.5503
+
+```{r}
+set.seed(123)
+training <- Weekly %>%
+  filter(Year %in% 1990:2008) %>%
+  select(c(Lag1,Lag2,Lag3,Lag4,Lag5,logVolume, Direction)) 
+  
+testing <- Weekly %>%
+  filter(Year %in% 2009:2010) %>%
+  select(c(Lag1,Lag2,Lag3,Lag4,Lag5,logVolume, Direction)) 
+
+
+mod3 <- train(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + logVolume,
+               data = training,
+               method = "glm",
+               trControl = ctrl, 
+               family = binomial)
+
+mod3
+predictions <- predict(mod3, newdata = testing)
+
+confusionMatrix(predictions, testing$Direction)
+
+
+```
+The prediction model trained on years 1990-2008 has mediocre sensitivity and specificity on the testing data of 2009-2010. The accuracy is 0.5096
+
+Now with LDA
+
+```{r}
+set.seed(123)
+mod4 <- train(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + logVolume,
+               data = training,
+               method = "lda",
+               trControl = ctrl, 
+               family = binomial)
+
+mod4
+
+predictions2 <- predict(mod4, newdata = testing)
+
+confusionMatrix(predictions2, testing$Direction)
+
+
+```
+
+The LDA prediction model has mediocre sensitivity and specificity, and an accuracy of 0.5192, which is superior to the logistic regression model.
+
+
+Now with Partial least squares discriminant analysis
+```{r}
+set.seed(123)
+
+mod5 <- plsda(select(training, -Direction), y=training$Direction, ncomp = 3)
+
+
+pred3 <- predict(mod5, newdata = select(testing,-Direction))
+
+
+confusionMatrix(pred3, testing$Direction)
+
+
+```
+
+The PLSDA has mediocre sensitivity and specificity, and correctly classified 0.5 of cases
+
+
+Now with nearest shrunken centroids
+```{r}
+set.seed(123)
+mod6 <- train(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + logVolume,
+               data = training,
+               method = "pam",
+               trControl = ctrl, 
+               tuneGrid = data.frame(.threshold = 0:25))
+
+mod6
+
+predictions4 <- predict(mod6, newdata = testing)
+
+confusionMatrix(predictions4, testing$Direction)
+```
+
+
+Something may be wrong, as the model is classifying all predictions as Up, which is mostly accurate (0.5865) and thus performs better than the other models.
+
+
+
+
