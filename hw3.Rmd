@@ -1,0 +1,224 @@
+---
+title: "hw3"
+author: "chris"
+date: "2023-08-07"
+output: pdf_document
+---
+
+```{r , message=F,warning=F}
+library(tidyverse)
+library(AppliedPredictiveModeling)
+library(caret)
+
+data(oil)
+```
+
+12.2. In Exercise 4.4, we described a data set which contained 96 oil samples each from one of seven types of oils (pumpkin, sunflower, peanut, olive,
+soybean, rapeseed, and corn). Gas chromatography was performed on each
+sample and the percentage of each type of 7 fatty acids was determined. We
+would like to use these data to build a model that predicts the type of oil
+based on a sample’s fatty acid percentages.
+
+
+(a) Like the hepatic injury data, these data suffer from extreme imbalance.
+Given this imbalance, should the data be split into training and test sets?
+
+Yes, imbalanced data should be handled using approaches such as cross-validation or resampling techniques such as stratified random sampling, up sampling, or down sampling.
+
+```{r}
+set.seed(123)
+fattyAcids$oilType <- oilType
+strat <- createDataPartition(fattyAcids$oilType,
+ p = .59,
+ list= FALSE,
+ times=1)
+
+strat <- as.data.frame(strat)
+
+train <- fattyAcids[strat$Resample, ]
+test <- fattyAcids[-strat$Resample,]
+
+
+```
+
+Linear discriminant analysis
+```{r}
+set.seed(123)
+
+lda <- train(x = train[, 1:7], y = train[, 8],
+             method = "lda", 
+             preProc = c('center','scale'),
+             metric = "Accuracy",
+             trControl = trainControl(summaryFunction = defaultSummary,
+                                      method = "cv",
+                                      classProbs = T,
+                                      savePredictions = T))
+lda
+confusionMatrix(data = predict(lda, test[,1:7]), reference = test[,8])
+
+
+
+```
+
+Penalized multinomial logistic regression
+```{r}
+set.seed(123)
+
+log <- train(x = train[, 1:7], y = train[, 8],
+             method = "multinom", preProc = c('center','scale'),
+             metric = "Accuracy",
+             trControl = trainControl(summaryFunction = defaultSummary,
+                                      method = "cv",
+                                      classProbs = T,
+                                      savePredictions = T))
+log
+confusionMatrix(data = predict(log, test[,1:7]), reference = test[,8])
+
+
+
+```
+
+(b) Which classification statistic would you choose to optimize for this exercise and why?
+
+Accuracy and Kappa since they were similar in training and testing data
+
+
+
+(c) Of the models presented in this chapter, which performs best on these
+data? Which oil type does the model most accurately predict? Least
+accurately predict?
+
+Comparing LDA to penalized multinomial logistic regression, both methods perform equally well on the data.
+
+
+
+12.3. The web site17 for the MLC++ software package contains a number of
+machine learning data sets. The “churn” data set was developed to predict
+telecom customer churn based on information about their account. The data
+files state that the data are “artificial based on claims similar to real world.”
+The data consist of 19 predictors related to the customer account, such
+as the number of customer service calls, the area code, and the number of
+minutes. The outcome is whether the customer churned
+
+
+The data are contained in the C50 package and can be loaded using:
+
+```{r, warning=F,message=F}
+# library(C50)
+# data(churn)
+# ## Two objects are loaded: churnTrain and churnTest
+# str(churnTrain)
+# table(churnTrain$Class)
+# 
+# Error in str(churnTrain) : object 'churnTrain' not found
+
+```
+
+Data won't load
+
+
+
+
+
+
+
+
+
+13.2. Use the fatty acid data from the previous exercise set (Exercise 12.2).
+
+
+(a) Use the same data splitting approach (if any) and pre-processing steps
+that you did in the previous chapter. Using the same classification statistic
+as before, build models described in this chapter for these data. Which
+model has the best predictive ability? How does this optimal model’s
+performance compare to the best linear model’s performance? Would you
+infer that the data have nonlinear separation boundaries based on this
+comparison?
+
+
+Nonlinear discriminant analysis
+```{r, warning=F}
+set.seed(123)
+nda <- train(train[,1:7], train[,8],
+ method = "mda",
+ metric = "Accuracy",
+ preProc = c('center','scale'),
+ tuneGrid = expand.grid(.subclasses = 1:8),
+ trControl = trainControl(summaryFunction = defaultSummary,
+                                      method = "cv",
+                                      classProbs = T,
+                                      savePredictions = T))
+nda
+
+confusionMatrix(data = predict(nda, test[,1:7]), reference = test[,8])
+
+```
+NDA: Accuracy  0.944, Kappa = 0.924
+
+```{r, warning=F}
+nnetGrid <- expand.grid(.size = 1:10, .decay = c(0, .1, 1, 2))
+maxSize <- max(nnetGrid$.size)
+numWts <- 1*(maxSize * (length(train[,1:7]) + 1) + maxSize + 1)
+
+set.seed(123)
+nnet <- train(train[,1:7], train[,8],
+ method = "nnet",
+ preProc = c('center','scale'),
+ metric = "Accuracy",
+ tuneGrid = nnetGrid,
+ trace = F,
+ maxit = 100,
+ MaxNWts = numWts,
+ trControl = trainControl(summaryFunction = defaultSummary,
+                                      method = "cv",
+                                      classProbs = T,
+                                      savePredictions = T))
+nnet
+
+confusionMatrix(data = predict(nnet, test[,1:7]), reference = test[,8])
+
+
+```
+NNet equal to NDA
+
+```{r, warning=F}
+
+set.seed(123)
+
+
+ 
+knn <- train(train[,1:7], train[,8],
+ method = "knn",
+ metric = "Accuracy",
+ preProc = c('center','scale'),
+ tuneGrid = data.frame(.k = c(4*(0:5)+1, 20*(1:5)+1, 50*(2:9)+1)),
+ trControl = trainControl(summaryFunction = defaultSummary,
+                                      method = "cv",
+                                      classProbs = T,
+                                      savePredictions = T))
+knn
+
+confusionMatrix(data = predict(knn, test[,1:7]), reference = test[,8])
+```
+Accuracy = 0.9444
+Kappa = 0.924
+
+
+(b) Which oil type does the optimal model most accurately predict? Least
+accurately predict?
+
+Nonlinear discriminant analysis, Neural networks, and K-Nearest Neighbors have all equal performance in predicting oil. Perhaps I messed up somewhere
+
+
+
+
+
+
+
+
+
+
+
+
+
+

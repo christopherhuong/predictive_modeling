@@ -1,0 +1,201 @@
+---
+title: "final"
+author: "chris"
+date: "2023-08-09"
+output: pdf_document
+---
+
+```{r, warning=F,message=F}
+library(tidyverse)
+library(psych)
+library(caret)
+library(mice)
+library(kernlab)
+library(klaR)
+
+```
+
+```{r}
+dat <- read.csv('diabetes.csv')
+```
+
+The Pima Indian Diabetes data set is a cross-sectional sample which contains several measured variables (columns) for 768 individual (rows) which are used to train a model to predict diabetes (Outcome: 1=yes, 0=no). The predictors included in this data set are number of pregnancies, blood glucose concentration, diastolic blood pressure, skin thickness, blood insulin levels, BMI, diabetes risk based on family history, and age. All of the predictors are continuous, and the outcome variable is binary. 
+
+
+In building our classification machine learning model, we will use 10-fold crossvalidation to optimize a model parameter and avoid overfitting.
+
+As this is a binary classification problem where we want to limit false negatives (it's better to falsely classify someone as having diabetes than to falsely classify someone as not having diabetes) we will use the sensitivity metric, which is the proportion of those who have diabetes and were diagnosed with diabetes (true positives) to everyone who has diabetes. We will also visualize our performance with a confusion matrix.
+
+In addition to sensitivity, we will also compute the Receiver Operating Characteristic (ROC) curve.
+
+Insert NA where there are 0s
+```{r}
+dat <- dat %>%
+   mutate(across(all_of(colnames(select(dat,-c(Pregnancies,Outcome)))), ~ ifelse(. == 0, NA, .)))
+
+percentmiss <- function(x){
+  sum(is.na(x)) / length(x) * 100} 
+
+apply(dat, 2, percentmiss)  
+```
+Multiple imputation using MICE, then taking one imputation for the rest of analysis
+```{r}
+# dat_imp <- mice(dat, maxit=3,m=3, seed=333)
+# save(dat_imp, file='dat_imp.RData')
+load('dat_imp.RData')
+
+# take one imputation
+dat <- complete(dat_imp, action = 1)
+
+
+dat <- dat %>%
+  mutate(Outcome = case_when(Outcome == 0 ~ "no",
+                             Outcome == 1 ~ "yes"))
+
+dat$Outcome <- as.factor(dat$Outcome)
+
+sum(is.na(dat))
+```
+
+
+
+First, we will visually inspect the variables.
+```{r}
+vars_list <- as.list(colnames(select(dat, -Outcome)))
+
+par(mfrow=c(3,3))
+for(i in vars_list){hist(dat[,i],xlab=i,main="")}
+```
+
+Pregnancies, insulin, DPF, and age seem to be right-skewed. Less people have diabetes than have diabetes.
+
+
+Quantitative inspection
+```{r}
+describe(dat)[3:13]
+```
+
+
+Check for colinearity. 
+
+```{r}
+cor(dplyr::select(dat, -Outcome),
+    dplyr::select(dat, -Outcome))
+
+```
+Predictors are not highly correlated with each other, therefore keep all predictors in the model.
+
+
+Split sample using stratified random sampling based on Outcome.
+
+```{r}
+set.seed(123)
+train <- createDataPartition(dat$Outcome, p = .80, list= FALSE)
+
+dat_train <- dat[train,]
+dat_test <- dat[-train,]
+```
+
+We will train two linear classification models, and two nonlinear classification models, and compare their performance using the sensitivity metric on the testing data.
+
+First, train logistic regression using 10-fold cross-validation
+
+```{r}
+set.seed(123)
+mod_log <- train(dat_train[,1:8],
+                 y = dat_train$Outcome,
+                 method = "glm",
+                 metric = "ROC",
+                 preProcess = c("center","scale"),
+                 trControl = trainControl(method = "cv", number = 10,
+                                          classProbs = T,
+                                          savePredictions = T,
+                                          summaryFunction = twoClassSummary))
+
+mod_log
+confusionMatrix(data = predict(mod_log, dat_test[,1:8]), reference = dat_test$Outcome)
+```
+
+Sensitivity of 0.91 on testing set.
+
+
+Second, train a linear discriminant analysis using 10-fold cross-validation
+
+
+```{r}
+set.seed(123)
+mod_lda <- train(dat_train[,1:8],
+                 y = dat_train$Outcome,
+                 method = "lda",
+                 metric = "ROC",
+                 preProcess = c("center","scale"),
+                 trControl = trainControl(method = "cv", number = 10,
+                                          classProbs = T,
+                                          savePredictions = T,
+                                          summaryFunction = twoClassSummary))
+
+mod_lda
+confusionMatrix(data = predict(mod_lda, dat_test[,1:8]), reference = dat_test$Outcome)
+```
+
+LDA has very similar performance on the training data, and has identical predictive performance on the testing data as logistic regression.
+
+
+
+Now train a support vector machine with 10-fold cross-validation. 
+
+
+```{r}
+sigmaRangeReduced <- sigest(as.matrix(dat_train[,1:8]))
+svmRGridReduced <- expand.grid(.sigma = sigmaRangeReduced[1], .C = 2^(seq(-4, 4)))
+set.seed(123)
+mod_svm <- train(dat_train[,1:8], 
+                 y = dat_train$Outcome,
+                 method = "svmRadial",
+                 metric = "ROC", 
+                 preProc = c("center", "scale"), 
+                 tuneGrid = svmRGridReduced, 
+                 fit = FALSE, 
+                 trControl = trainControl(method = "cv", number = 10,
+                                          classProbs = T,
+                                          savePredictions = T,
+                                          summaryFunction = twoClassSummary))
+  
+
+mod_svm
+confusionMatrix(data = predict(mod_svm, dat_test[,1:8]), reference = dat_test$Outcome)
+
+```
+
+
+Sensitivity is slightly lower for the SVM (0.90) than the linear classification models (0.91 for both logistic and LDA).
+
+Now we train a K-Nearest Neighbors model
+
+
+
+```{r}
+
+mod_knn <- train(dat_train[,1:8], 
+                 y = dat_train$Outcome,
+                 method = "knn",
+                 metric = "ROC", 
+                 preProc = c("center", "scale"), 
+                 tuneGrid = data.frame(.k = c(4*(0:5)+1,
+                                              20*(1:5)+1,
+                                              50*(2:9)+1)),
+                 trControl = trainControl(method = "cv", number = 10,
+                                          classProbs = T,
+                                          savePredictions = T,
+                                          summaryFunction = twoClassSummary))
+  
+
+mod_knn
+confusionMatrix(data = predict(mod_knn, dat_test[,1:8]), reference = dat_test$Outcome)
+```
+
+The sensitivity was slightly better on the testing data than all the other models at 0.92
+
+
+
+
